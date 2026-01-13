@@ -1,0 +1,136 @@
+Alert Name,Category,Priority,Alert System,Metric Type,Threshold/Condition,Duration,Instance Count,Status
+[LCP-Prod-P0],Priority Levels,P0,VMAlert,Multi-condition,LCP Production Critical,N/A,5,Active
+[LCP-Prod-P1],Priority Levels,P1,VMAlert,Multi-condition,LCP Production High,N/A,5,Active
+[LCP-Prod-P2],Priority Levels,P2,VMAlert,Multi-condition,LCP Production Medium,N/A,5,Active
+[LCP-Prod-P3],Priority Levels,P3,VMAlert,Multi-condition,LCP Production Low,N/A,5,Active
+datalink任务延迟告警(夜晚),DataLink,P2,VMAlert,Pipeline,Task Delay (Night),N/A,5,Active
+datalink任务异常告警(夜晚),DataLink,P2,VMAlert,Pipeline,Task Exception (Night),N/A,5,Active
+datalink普通任务延迟(白天),DataLink,P3,VMAlert,Pipeline,Regular Task Delay (Day),N/A,5,Active
+datalink普通任务异常(白天),DataLink,P3,VMAlert,Pipeline,Regular Task Exception (Day),N/A,5,Active
+datalink离线普通任务延迟(白天),DataLink,P3,VMAlert,Pipeline,Offline Regular Task Delay (Day),N/A,5,Active
+datalink离线普通任务异常(白天),DataLink,P3,VMAlert,Pipeline,Offline Regular Task Exception (Day),N/A,5,Active
+datalink离线核心任务延迟(白天),DataLink,P1,VMAlert,Pipeline,Offline Core Task Delay (Day),N/A,5,Active
+datalink离线核心任务异常(白天),DataLink,P1,VMAlert,Pipeline,Offline Core Task Exception (Day),N/A,5,Active
+datalink离线重要任务延迟(白天),DataLink,P2,VMAlert,Pipeline,Offline Important Task Delay (Day),N/A,5,Active
+datalink离线重要任务异常(白天),DataLink,P2,VMAlert,Pipeline,Offline Important Task Exception (Day),N/A,5,Active
+datalink重要任务延迟(白天),DataLink,P2,VMAlert,Pipeline,Important Task Delay (Day),N/A,5,Active
+datalink重要任务异常(白天),DataLink,P2,VMAlert,Pipeline,Important Task Exception (Day),N/A,5,Active
+datalink黄金流程任务延迟(白天),DataLink,P0,VMAlert,Pipeline,Golden Flow Task Delay (Day),N/A,5,Active
+datalink黄金流程任务异常(白天),DataLink,P0,VMAlert,Pipeline,Golden Flow Task Exception (Day),N/A,5,Active
+【DB告警】 AWS-RDS CPU使用率连续三分钟大于90%,Database-RDS,P1,VMAlert,CPU,>90% for 3min,3m,5,Active
+【DB告警】AWS Mongo CPU使用率连续三分钟大于90%,Database-Mongo,P1,VMAlert,CPU,>90% for 3min,3m,5,Active
+【DB告警】AWS Mongo CPU使用率连续三分钟大于90%_语音,Database-Mongo,P0,VMAlert,CPU,>90% for 3min (Voice),3m,5,Active
+【DB告警】AWS Mongo 可用内存连续三分钟不足500M,Database-Mongo,P1,VMAlert,Memory,<500M for 3min,3m,5,Active
+【DB告警】AWS RDS CPU使用率连续三分钟大于90%,Database-RDS,P1,VMAlert,CPU,>90% for 3min,3m,5,Active
+【DB告警】AWS RDS Vip 持续一分钟不通,Database-RDS,P0,VMAlert,Connectivity,VIP unreachable 1min,1m,5,Active
+【DB告警】AWS RDS Vip 持续一分钟不通_语音,Database-RDS,P0,VMAlert,Connectivity,VIP unreachable 1min (Voice),1m,5,Active
+【DB告警】AWS RDS 发生重启或者主从切换,Database-RDS,P0,VMAlert,Failover,Restart/Failover detected,Instant,5,Active
+【DB告警】AWS RDS 发生重启或者主从切换_语音,Database-RDS,P0,VMAlert,Failover,Restart/Failover (Voice),Instant,5,Active
+【DB告警】AWS RDS 慢查询数量持续三分钟大于300个,Database-RDS,P2,VMAlert,Performance,>300 slow queries for 3min,3m,5,Active
+【DB告警】AWS RDS 活跃线程持续两分钟大于24,Database-RDS,P2,VMAlert,Performance,>24 active threads for 2min,2m,5,Active
+【DB告警】AWS RDS 磁盘空间连续3分钟不足10G,Database-RDS,P1,VMAlert,Disk,<10GB for 3min,3m,5,Active
+【DB告警】AWS Redis CPU使用率大于90%,Database-Redis,P1,VMAlert,CPU,>90%,Instant,5,Active
+【DB告警】AWS-ES CPU 使用率大于90%,Database-ES,P1,VMAlert,CPU,>90%,Instant,5,Active
+【DB告警】AWS-ES CPU 使用率大于90%_语音,Database-ES,P0,VMAlert,CPU,>90% (Voice),Instant,5,Active
+【DB告警】AWS-ES 集群状态Red,Database-ES,P0,VMAlert,Cluster Health,Status Red,Instant,5,Active
+【DB告警】AWS-ES 集群状态Red_语音,Database-ES,P0,VMAlert,Cluster Health,Status Red (Voice),Instant,5,Active
+【DB告警】AWS-ES 集群状态Yellow,Database-ES,P2,VMAlert,Cluster Health,Status Yellow,Instant,5,Active
+【DB告警】AWS-ES磁盘空间不足10G,Database-ES,P1,VMAlert,Disk,<10GB,Instant,5,Active
+【DB告警】AWS-ES磁盘空间不足10G_语音,Database-ES,P0,VMAlert,Disk,<10GB (Voice),Instant,5,Active
+【DB告警】AWS-RDS 慢查询数量持续三分钟大于300个,Database-RDS,P2,VMAlert,Performance,>300 slow queries for 3min,3m,5,Active
+【DB告警】AWS-RDS 活跃线程持续两分钟大于24,Database-RDS,P2,VMAlert,Performance,>24 active threads for 2min,2m,5,Active
+【DB告警】Redis CPU使用率持续3分钟超过70%,Database-Redis,P2,VMAlert,CPU,>70% for 3min,3m,5,Active
+【DB告警】Redis 内存使用率持续3分钟超过70%,Database-Redis,P2,VMAlert,Memory,>70% for 3min,3m,5,Active
+【DB告警】Redis 发生客户端堵塞,Database-Redis,P1,VMAlert,Connectivity,Client blocked,Instant,5,Active
+【DB告警】Redis 实例命令平均时延大于2ms,Database-Redis,P2,VMAlert,Latency,>2ms avg,Instant,5,Active
+【DB告警】Redis 实例客户端nomal缓冲超过32m,Database-Redis,P2,VMAlert,Memory,>32MB client buffer,Instant,5,Active
+【DB告警】Redis 实例流量大于32Mbps,Database-Redis,P2,VMAlert,Network,>32Mbps,Instant,5,Active
+【DB告警】Redis 实例触发key淘汰,Database-Redis,P2,VMAlert,Eviction,Key eviction triggered,Instant,5,Active
+【DB告警】Redis 实例连接数使用率大于30%,Database-Redis,P2,VMAlert,Connections,>30% usage,Instant,5,Active
+【DB告警】Redis 实例采集失败请检查是否存活,Database-Redis,P0,VMAlert,Availability,Collection failed,Instant,5,Active
+【DB告警】exporter 进程异常,Database-Exporter,P0,VMAlert,Process,Exporter process abnormal,Instant,5,Active
+【UPUSH】【北美】五分钟短信供应商调用失败超过阈值 50,SMS-UPUSH,P1,VMAlert,API,>50 failures in 5min,5m,5,Active
+【UPUSH】【北美】五分钟短信供应商返回值失败超过阈值 200,SMS-UPUSH,P1,VMAlert,API,>200 return failures in 5min,5m,5,Active
+【UPUSH】【北美】营销短信回执成功率低于 60%,SMS-UPUSH,P2,VMAlert,Success Rate,<60% marketing receipt,Instant,5,Active
+【UPUSH】【北美】营销短信过滤数超过 100,SMS-UPUSH,P2,VMAlert,Filter,>100 marketing filtered,Instant,5,Active
+【UPUSH】【北美】行业短信回执成功率低于 70%,SMS-UPUSH,P1,VMAlert,Success Rate,<70% industry receipt,Instant,5,Active
+【UPUSH】【北美】行业短信过滤数超过 50,SMS-UPUSH,P2,VMAlert,Filter,>50 industry filtered,Instant,5,Active
+【UPUSH】【北美】验证码发送量同比增加 30%,SMS-UPUSH,P2,VMAlert,Volume,>30% YoY increase,Instant,5,Active
+【UPUSH】【北美】验证码回执成功率低于 70%,SMS-UPUSH,P1,VMAlert,Success Rate,<70% verification receipt,Instant,5,Active
+【UPUSH】【北美】验证码过滤数超过 50,SMS-UPUSH,P2,VMAlert,Filter,>50 verification filtered,Instant,5,Active
+【iZeus-策略10】-JVM CPU使用率大于20,APM-iZeus,P2,VMAlert,JVM,CPU >20%,Instant,3,Active
+【iZeus-策略10】-服务响应时间（ms）大于1500,APM-iZeus,P2,VMAlert,Latency,Response >1500ms,Instant,3,Active
+【iZeus-策略11】-端点每分钟失败数大于等于1,APM-iZeus,P2,VMAlert,Errors,>=1 endpoint failure/min,1m,3,Active
+【iZeus-策略12】-端点每分钟失败数大于等于1,APM-iZeus,P2,VMAlert,Errors,>=1 endpoint failure/min,1m,3,Active
+【iZeus-策略15】-服务每分钟异常数大于3,APM-iZeus,P2,VMAlert,Errors,>3 exceptions/min,1m,3,Active
+【iZeus-策略16】-端点每分钟失败数大于2,APM-iZeus,P2,VMAlert,Errors,>2 endpoint failures/min,1m,3,Active
+【iZeus-策略17】-端点每分钟失败数大于3,APM-iZeus,P2,VMAlert,Errors,>3 endpoint failures/min,1m,3,Active
+【iZeus-策略1】-服务每分钟异常数大于2,APM-iZeus,P2,VMAlert,Errors,>2 exceptions/min,1m,3,Active
+【iZeus-策略2】-服务每分钟异常数大于2,APM-iZeus,P2,VMAlert,Errors,>2 exceptions/min,1m,3,Active
+【iZeus-策略3】-服务每分钟异常数大于2,APM-iZeus,P2,VMAlert,Errors,>2 exceptions/min,1m,3,Active
+【iZeus-策略4】-服务每分钟异常数大于2,APM-iZeus,P2,VMAlert,Errors,>2 exceptions/min,1m,3,Active
+【iZeus-策略5】-服务每分钟异常数大于3,APM-iZeus,P2,VMAlert,Errors,>3 exceptions/min,1m,3,Active
+【iZeus-策略6】-服务每分钟异常数大于2,APM-iZeus,P2,VMAlert,Errors,>2 exceptions/min,1m,3,Active
+【iZeus-策略7】-服务每分钟异常数大于2,APM-iZeus,P2,VMAlert,Errors,>2 exceptions/min,1m,3,Active
+【iZeus-策略8】-服务每分钟异常数大于2,APM-iZeus,P2,VMAlert,Errors,>2 exceptions/min,1m,3,Active
+【iZeus-策略9】-服务每分钟异常数大于2,APM-iZeus,P2,VMAlert,Errors,>2 exceptions/min,1m,3,Active
+【iZeus】Node-CPU-85,APM-iZeus,P1,VMAlert,CPU,Node CPU >85%,Instant,5,Active
+【iZeus】Node-Disk-85,APM-iZeus,P1,VMAlert,Disk,Node Disk >85%,Instant,5,Active
+【iZeus】Node-Memory-95,APM-iZeus,P1,VMAlert,Memory,Node Memory >95%,Instant,5,Active
+【iZeus】OAP-FGC-5,APM-iZeus,P2,VMAlert,JVM,OAP FGC >5,Instant,5,Active
+【iZeus】Storage-Receiver2Thanos-Receiver-0,APM-iZeus,P1,VMAlert,Storage,Thanos Receiver Issue,Instant,5,Active
+【iZeus】Storage-Receiver2VM-0,APM-iZeus,P1,VMAlert,Storage,VM Receiver Issue,Instant,5,Active
+【iZeus】Transfer-Agent2OAP-0,APM-iZeus,P1,VMAlert,Transfer,Agent to OAP Issue,Instant,5,Active
+【iZeus】Transfer-OAP2OAP-0,APM-iZeus,P1,VMAlert,Transfer,OAP to OAP Issue,Instant,5,Active
+【iZeus】Transfer-OAPTrace2Receiver-0,APM-iZeus,P1,VMAlert,Transfer,OAP Trace to Receiver Issue,Instant,5,Active
+【pod-cpu-兜底】P0 CPU使用率连续3分钟大于85%,Pod,P0,VMAlert,CPU,>85% for 3min (Fallback),3m,5,Active
+【pod-cpu】P0 CPU使用率连续10分钟大于50%,Pod,P0,VMAlert,CPU,>50% for 10min,10m,5,Active
+【pod-cpu】P0 CPU使用率连续3分钟大于70%,Pod,P0,VMAlert,CPU,>70% for 3min,3m,5,Active
+【pod-全局】P0 node节点up心跳丢失需检查节点是否宕机,Pod,P0,VMAlert,Availability,Node heartbeat lost,Instant,5,Active
+【pod-全局】P0 Pod 2m内发生重启请关注,Pod,P0,VMAlert,Stability,Pod restarted in 2min,2m,5,Active
+【pod-宕机】P1 WSS内存使用率连续3分钟等于100%(OOM参考),Pod,P1,VMAlert,Memory,100% memory for 3min,3m,5,Active
+【pod-线程】P0 容器线程数连续3分钟超过3600,Pod,P0,VMAlert,Threads,>3600 threads for 3min,3m,5,Active
+【pod-网卡】P0 分区写入速率连续3分钟大于50MBs,Pod,P0,VMAlert,IO,>50MB/s write for 3min,3m,5,Active
+【pod-网卡】P0 分区读取速率连续3分钟大于50MBs,Pod,P0,VMAlert,IO,>50MB/s read for 3min,3m,5,Active
+【pod-网卡】P0 网卡流入速率连续3分钟大于30MBs,Pod,P0,VMAlert,Network,>30MB/s ingress for 3min,3m,5,Active
+【pod-网卡】P0 网卡流出速率连续3分钟大于30MBs,Pod,P0,VMAlert,Network,>30MB/s egress for 3min,3m,5,Active
+【vm-CPU】P1 CPU平均负载大于CPU核心数量的1倍已持续5分钟,VM,P1,VMAlert,CPU,Load avg >1x cores for 5min,5m,5,Active
+【vm-CPU】P1 服务整体CPU平均使用率超过80%,VM,P1,VMAlert,CPU,>80% avg usage,Instant,5,Active
+【vm-cpu】P0 5分钟内服务CPU_iowait每秒的使用率大于80%,VM,P0,VMAlert,CPU,>80% iowait in 5min,5m,5,Active
+【vm-cpu】P0 服务CPU使用率窃取大于10%,VM,P0,VMAlert,CPU,>10% steal,Instant,5,Active
+【vm-fileSystem】P0 分区inodes使用率大于95%请立即处理,VM,P0,VMAlert,Disk,>95% inodes,Instant,5,Active
+【vm-fileSystem】P0 分区发送只读事件请检查分区读写情况,VM,P0,VMAlert,Disk,Read-only filesystem event,Instant,5,Active
+【vm-io】P0 服务io耗时大于90ms且同比超过20ms,VM,P0,VMAlert,IO,>90ms io latency,Instant,5,Active
+【vm-io】P1 磁盘IO使用率大于70%且同比超过20,VM,P1,VMAlert,IO,>70% disk IO usage,Instant,5,Active
+【vm-tcp】P0 TCP每秒重传报文数超过200,VM,P0,VMAlert,Network,>200 TCP retransmits/s,Instant,5,Active
+【vm-内存】P1 内存使用率大于90% 持续10分钟,VM,P1,VMAlert,Memory,>90% for 10min,10m,5,Active
+【vm-宕机】P0 up监控指标心跳丢失10分钟需检查设备是否宕机,VM,P0,VMAlert,Availability,Heartbeat lost for 10min,10m,5,Active
+【vm-磁盘】P1 分区使用率大于90%请手动处理,VM,P1,VMAlert,Disk,>90% partition usage,Instant,5,Active
+【vm-网卡】P0 入方向在5分钟内每秒丢弃的数据包大于20个,VM,P0,VMAlert,Network,>20 dropped packets/s in,5m,5,Active
+【vm-网卡】P0 入方向在5分钟内每秒错误的数据包大于20个,VM,P0,VMAlert,Network,>20 error packets/s in,5m,5,Active
+【vm-网卡】P0 出方向在5分钟内每秒丢弃的数据包大于20个,VM,P0,VMAlert,Network,>20 dropped packets/s out,5m,5,Active
+【vm-网卡】P0 出方向在5分钟内每秒错误的数据包大于20个,VM,P0,VMAlert,Network,>20 error packets/s out,5m,5,Active
+【vm-网卡】P0 网卡状态为down,VM,P0,VMAlert,Network,NIC status down,Instant,5,Active
+【北美-业务告警】取消订单持续5分钟大于1单,Business,P1,VMAlert,Orders,>1 cancelled order for 5min,5m,5,Active
+【北美-业务告警】新建-付款-完成订单持续10分钟少于1单,Business,P0,VMAlert,Orders,<1 complete order for 10min,10m,5,Active
+【北美-业务告警】订单支持持续10分钟小于1,Business,P0,VMAlert,Orders,<1 order support for 10min,10m,5,Active
+【北美-业务告警】过去10分钟注册数为0,Business,P0,VMAlert,Registration,0 registrations in 10min,10m,5,Active
+【北美-业务告警】过去5分钟支付金额小于500分,Business,P0,VMAlert,Payments,<500 cents in 5min,5m,5,Active
+【北美亚风控】全局策略熔断前预告警,Risk Control,P1,VMAlert,Circuit Breaker,Global policy pre-break,Instant,5,Active
+【北美亚风控】全局策略熔断告警,Risk Control,P0,VMAlert,Circuit Breaker,Global policy break,Instant,5,Active
+【北美亚风控】场景熔断前预告警,Risk Control,P1,VMAlert,Circuit Breaker,Scene pre-break,Instant,5,Active
+【北美风控】场景熔断告警,Risk Control,P0,VMAlert,Circuit Breaker,Scene break,Instant,5,Active
+【国际化北美风控】下单rpc接口最近5分钟调用总量超过200次且比上周同时段多60%,Risk Control,P1,VMAlert,Traffic,Order RPC >200 calls +60% WoW,5m,3,Active
+【国际化北美风控】支付rpc接口最近5分钟调用总量超过200次且比上周同时段多60%,Risk Control,P1,VMAlert,Traffic,Payment RPC >200 calls +60% WoW,5m,3,Active
+【国际化北美风控】注册rpc接口最近5分钟调用总量超过100次且比上周同时段多60%,Risk Control,P1,VMAlert,Traffic,Register RPC >100 calls +60% WoW,5m,3,Active
+【国际化北美风控】登录rpc接口最近5分钟调用总量超过100次且比上周同时段多60%,Risk Control,P1,VMAlert,Traffic,Login RPC >100 calls +60% WoW,5m,3,Active
+【国际化北美风控】短信rpc接口最近5分钟调用总量超过100次且比上周同时段多60%,Risk Control,P1,VMAlert,Traffic,SMS RPC >100 calls +60% WoW,5m,3,Active
+【网关告警】错误率大于15%,Gateway,P0,VMAlert,Errors,>15% error rate,Instant,5,Active
+【网络质量US-机房互拨】探测目标连续15s失败,Network,P0,VMAlert,Connectivity,Probe failed for 15s,15s,5,Active
+【默认策略】FGC次数大于0或YGC耗时大于500毫秒,APM-Default,P2,VMAlert,JVM,FGC >0 or YGC >500ms,Instant,3,Active
+【默认策略】异常okhttp总数大于等于50,APM-Default,P2,VMAlert,HTTP,>=50 okhttp exceptions,Instant,3,Active
+【默认策略】服务器每分钟异常数大于20,APM-Default,P1,VMAlert,Errors,>20 exceptions/min,1m,3,Active
+【默认策略】服务器每分钟异常数大于5,APM-Default,P2,VMAlert,Errors,>5 exceptions/min,1m,3,Active
+Slow Query Spike - High Rate Alert,Database-MySQL,warning,Grafana,Performance,sum(rate(mysql_global_status_slow_queries[5m])) by (instance) > 1,5m,1,Active
+Slow Query Critical - Very High Rate Alert,Database-MySQL,critical,Grafana,Performance,sum(rate(mysql_global_status_slow_queries[5m])) by (instance) > 2,5m,1,Active
+Slow Query Weekly Increase - WoW Spike Alert,Database-MySQL,warning,Grafana,Performance,sum(increase(mysql_global_status_slow_queries[7d])) by (instance) > 10000,1h,1,Active

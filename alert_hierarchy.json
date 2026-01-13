@@ -1,0 +1,330 @@
+{
+  "metadata": {
+    "generated_at": "2026-01-13T00:00:00Z",
+    "total_alerts": 122,
+    "grafana_native_alerts": 3,
+    "vmalert_rules": 119,
+    "contact_points": 1
+  },
+  "datasources": [
+    {
+      "uid": "ff7ehok3sf56oa",
+      "name": "elasticsearch",
+      "type": "elasticsearch"
+    },
+    {
+      "uid": "af8p2vx4nhp1ce",
+      "name": "MySQL-iriskcontrol",
+      "type": "mysql"
+    },
+    {
+      "uid": "ef5ay9lchfg1sa",
+      "name": "MySQL-Ldas",
+      "type": "mysql"
+    },
+    {
+      "uid": "af8o704xu3280a",
+      "name": "MySQL-luckyhealth",
+      "type": "mysql"
+    },
+    {
+      "uid": "ff7hkeec6c9a8e",
+      "name": "prometheus",
+      "type": "prometheus"
+    },
+    {
+      "uid": "ff6p0gjt24phce",
+      "name": "prometheus_redis",
+      "type": "prometheus"
+    },
+    {
+      "uid": "df8o21agxtkw0d",
+      "name": "UMBQuerier-Luckin",
+      "type": "prometheus",
+      "isDefault": true
+    }
+  ],
+  "folders": [
+    {
+      "uid": "dba-monitoring",
+      "title": "DBA Monitoring"
+    },
+    {
+      "uid": "mysql-monitor-folder",
+      "title": "MySQL Monitor"
+    },
+    {
+      "uid": "ee5avo29k0z28f",
+      "title": "活动保障大盘"
+    }
+  ],
+  "contact_points": [
+    {
+      "uid": "ff46tgx17x7cwa",
+      "name": "email receiver",
+      "type": "email"
+    }
+  ],
+  "alert_systems": {
+    "grafana_native": {
+      "count": 3,
+      "folder": "DBA Monitoring",
+      "rule_group": "slow-sql-governance",
+      "alerts": [
+        {
+          "uid": "bf7zrw6q74e80a",
+          "title": "Slow Query Spike - High Rate Alert",
+          "severity": "warning",
+          "for": "5m"
+        },
+        {
+          "uid": "af7zrwm660su8d",
+          "title": "Slow Query Critical - Very High Rate Alert",
+          "severity": "critical",
+          "for": "5m"
+        },
+        {
+          "uid": "ef7zrx2gdoy68f",
+          "title": "Slow Query Weekly Increase - WoW Spike Alert",
+          "severity": "warning",
+          "for": "1h"
+        }
+      ]
+    },
+    "vmalert": {
+      "count": 119,
+      "config_file": "/etc/rules/alert_rules.json",
+      "jobs": [
+        "us_izeus_basic_vm_alert",
+        "us_izeus_apm_vm_alert"
+      ],
+      "instances": [
+        "10.238.3.137:8880",
+        "10.238.3.143:8880",
+        "10.238.3.52:8880",
+        "10.238.3.153:8880"
+      ]
+    }
+  },
+  "categories": {
+    "database": {
+      "subcategories": {
+        "rds_mysql": {
+          "count": 11,
+          "alerts": [
+            "AWS-RDS CPU使用率连续三分钟大于90%",
+            "AWS RDS CPU使用率连续三分钟大于90%",
+            "AWS RDS Vip 持续一分钟不通",
+            "AWS RDS Vip 持续一分钟不通_语音",
+            "AWS RDS 发生重启或者主从切换",
+            "AWS RDS 发生重启或者主从切换_语音",
+            "AWS RDS 慢查询数量持续三分钟大于300个",
+            "AWS-RDS 慢查询数量持续三分钟大于300个",
+            "AWS RDS 活跃线程持续两分钟大于24",
+            "AWS-RDS 活跃线程持续两分钟大于24",
+            "AWS RDS 磁盘空间连续3分钟不足10G"
+          ]
+        },
+        "mongodb": {
+          "count": 3,
+          "alerts": [
+            "AWS Mongo CPU使用率连续三分钟大于90%",
+            "AWS Mongo CPU使用率连续三分钟大于90%_语音",
+            "AWS Mongo 可用内存连续三分钟不足500M"
+          ]
+        },
+        "elasticsearch": {
+          "count": 7,
+          "alerts": [
+            "AWS-ES CPU 使用率大于90%",
+            "AWS-ES CPU 使用率大于90%_语音",
+            "AWS-ES 集群状态Red",
+            "AWS-ES 集群状态Red_语音",
+            "AWS-ES 集群状态Yellow",
+            "AWS-ES磁盘空间不足10G",
+            "AWS-ES磁盘空间不足10G_语音"
+          ]
+        },
+        "redis": {
+          "count": 11,
+          "alerts": [
+            "AWS Redis CPU使用率大于90%",
+            "Redis CPU使用率持续3分钟超过70%",
+            "Redis 内存使用率持续3分钟超过70%",
+            "Redis 发生客户端堵塞",
+            "Redis 实例命令平均时延大于2ms",
+            "Redis 实例客户端nomal缓冲超过32m",
+            "Redis 实例流量大于32Mbps",
+            "Redis 实例触发key淘汰",
+            "Redis 实例连接数使用率大于30%",
+            "Redis 实例采集失败请检查是否存活",
+            "exporter 进程异常"
+          ]
+        },
+        "grafana_native": {
+          "count": 3,
+          "alerts": [
+            "Slow Query Spike - High Rate Alert",
+            "Slow Query Critical - Very High Rate Alert",
+            "Slow Query Weekly Increase - WoW Spike Alert"
+          ]
+        }
+      },
+      "total_count": 35
+    },
+    "pod_container": {
+      "count": 11,
+      "prefix": "【pod-",
+      "alerts": [
+        "P0 CPU使用率连续3分钟大于85%",
+        "P0 CPU使用率连续10分钟大于50%",
+        "P0 CPU使用率连续3分钟大于70%",
+        "P0 node节点up心跳丢失",
+        "P0 Pod 2m内发生重启",
+        "P1 WSS内存使用率连续3分钟等于100%",
+        "P0 容器线程数连续3分钟超过3600",
+        "P0 分区写入速率连续3分钟大于50MBs",
+        "P0 分区读取速率连续3分钟大于50MBs",
+        "P0 网卡流入速率连续3分钟大于30MBs",
+        "P0 网卡流出速率连续3分钟大于30MBs"
+      ]
+    },
+    "vm_host": {
+      "count": 17,
+      "prefix": "【vm-",
+      "alerts": [
+        "P1 CPU平均负载大于CPU核心数量的1倍",
+        "P1 服务整体CPU平均使用率超过80%",
+        "P0 服务CPU_iowait使用率大于80%",
+        "P0 服务CPU使用率窃取大于10%",
+        "P0 分区inodes使用率大于95%",
+        "P0 分区发送只读事件",
+        "P0 服务io耗时大于90ms",
+        "P1 磁盘IO使用率大于70%",
+        "P0 TCP每秒重传报文数超过200",
+        "P1 内存使用率大于90%",
+        "P0 up监控指标心跳丢失10分钟",
+        "P1 分区使用率大于90%",
+        "P0 入方向丢弃数据包大于20个",
+        "P0 入方向错误数据包大于20个",
+        "P0 出方向丢弃数据包大于20个",
+        "P0 出方向错误数据包大于20个",
+        "P0 网卡状态为down"
+      ]
+    },
+    "apm_izeus": {
+      "count": 26,
+      "prefix": "【iZeus",
+      "subcategories": {
+        "strategy": 17,
+        "infrastructure": 9
+      }
+    },
+    "business": {
+      "count": 5,
+      "prefix": "【北美-业务告警】",
+      "alerts": [
+        "取消订单持续5分钟大于1单",
+        "新建-付款-完成订单持续10分钟少于1单",
+        "订单支持持续10分钟小于1",
+        "过去10分钟注册数为0",
+        "过去5分钟支付金额小于500分"
+      ]
+    },
+    "risk_control": {
+      "count": 9,
+      "prefix": "【风控】【北美风控】【国际化北美风控】",
+      "alerts": [
+        "全局策略熔断前预告警",
+        "全局策略熔断告警",
+        "场景熔断前预告警",
+        "场景熔断告警",
+        "下单rpc接口调用量异常",
+        "支付rpc接口调用量异常",
+        "注册rpc接口调用量异常",
+        "登录rpc接口调用量异常",
+        "短信rpc接口调用量异常"
+      ]
+    },
+    "sms_upush": {
+      "count": 9,
+      "prefix": "【UPUSH】",
+      "alerts": [
+        "五分钟短信供应商调用失败超过阈值50",
+        "五分钟短信供应商返回值失败超过阈值200",
+        "营销短信回执成功率低于60%",
+        "营销短信过滤数超过100",
+        "行业短信回执成功率低于70%",
+        "行业短信过滤数超过50",
+        "验证码发送量同比增加30%",
+        "验证码回执成功率低于70%",
+        "验证码过滤数超过50"
+      ]
+    },
+    "datalink": {
+      "count": 18,
+      "prefix": "datalink",
+      "types": ["delay", "exception"],
+      "times": ["day", "night"],
+      "priorities": ["golden_flow", "core", "important", "regular"]
+    },
+    "network_gateway": {
+      "count": 2,
+      "alerts": [
+        "【网关告警】错误率大于15%",
+        "【网络质量US-机房互拨】探测目标连续15s失败"
+      ]
+    },
+    "priority_levels": {
+      "count": 4,
+      "alerts": [
+        "[LCP-Prod-P0]",
+        "[LCP-Prod-P1]",
+        "[LCP-Prod-P2]",
+        "[LCP-Prod-P3]"
+      ]
+    },
+    "default_strategy": {
+      "count": 4,
+      "prefix": "【默认策略】",
+      "alerts": [
+        "FGC次数大于0或YGC耗时大于500毫秒",
+        "异常okhttp总数大于等于50",
+        "服务器每分钟异常数大于20",
+        "服务器每分钟异常数大于5"
+      ]
+    }
+  },
+  "priority_distribution": {
+    "P0": {
+      "count": 42,
+      "percentage": "34.4%"
+    },
+    "P1": {
+      "count": 35,
+      "percentage": "28.7%"
+    },
+    "P2": {
+      "count": 38,
+      "percentage": "31.1%"
+    },
+    "P3": {
+      "count": 7,
+      "percentage": "5.7%"
+    }
+  },
+  "metric_type_distribution": {
+    "CPU": 18,
+    "Memory": 8,
+    "Disk": 10,
+    "Network": 14,
+    "IO": 6,
+    "Latency": 4,
+    "Errors": 18,
+    "Availability": 6,
+    "Performance": 10,
+    "Traffic": 5,
+    "Pipeline": 18,
+    "Other": 5
+  }
+}
