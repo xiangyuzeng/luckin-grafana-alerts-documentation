@@ -1,253 +1,173 @@
-# 【北美亚风控】场景熔断前预告警
+# 【风控告警】场景预熔断
 
-> **Luckin Coffee USA - DevOps/DBA Alert Response Handbook**
-> **瑞幸咖啡美国 - 运维/DBA告警响应手册**
-
----
-
-## 告警概览 Alert Overview
-
-| 属性 Attribute | 值 Value |
-|----------------|----------|
-| **Alert ID** | ALR-124 |
-| **告警名称 Alert Name** | 【北美亚风控】场景熔断前预告警 |
-| **优先级 Priority** | P1 |
-| **服务等级 Service Level** | L0 - Core Business Service (核心业务服务) |
-| **类别 Category** | Risk Control |
-| **系统 System** | VMAlert |
-| **指标类型 Metric Type** | Circuit Breaker |
-| **阈值/条件 Threshold** | Scene pre-break |
-| **持续时间 Duration** | Instant |
-| **响应时间 Response Time** | HIGH (< 15 minutes) |
-| **责任团队 Owner Team** | RiskControl - Risk Control (风控) |
+> **瑞幸咖啡美国运维告警响应参考手册**
+>
+> 本手册为参考文档，请根据实际情况灵活处理。
 
 ---
 
-## 告警描述 Description
+## 告警概览
 
-### 中文说明
-此告警在 **Scene pre-break** 条件满足时触发。该告警属于 **P1** 优先级，影响 **L0** 级别服务。
-
-**触发条件:** Circuit Breaker 指标达到阈值 Scene pre-break，持续时间: Instant
-
-**重要性:** 此告警关联 风控 团队负责的 Fraud Prevention 领域服务，需要在 < 15 minutes 内响应处理。
-
-### English Description
-This alert triggers when the condition **Scene pre-break** is met. This is a **P1** priority alert affecting **L0** level services.
-
-**Trigger Condition:** Circuit Breaker metric reaches threshold Scene pre-break, duration: Instant
-
-**Importance:** This alert is associated with the Risk Control team's Fraud Prevention domain services and requires response within < 15 minutes.
+| 属性 | 值 |
+|------|-----|
+| **告警ID** | ALR-124 |
+| **告警名称** | 【风控告警】场景预熔断 |
+| **优先级** | P1 |
+| **服务等级** | L0 |
+| **类别** | Risk Control |
+| **响应时间** | 快速响应（< 15分钟） |
+| **责任团队** | 风控团队 |
 
 ---
 
-## 影响范围 Impact Scope
+## 告警描述
 
-### 关联服务 Affected Services
+此告警属于 **P1** 优先级，影响 **L0** 级别服务。
 
-| 服务名称 Service | 等级 Level | 描述 Description | 团队 Team |
-|-----------------|------------|------------------|-----------|
-| iriskcontrolservice | L0 | 海外风控服务 Risk Control | RiskControl |
-
-### 关联数据库 Affected Databases
-
-- `luckyus_iriskcontrolservice (MongoDB)`
-
-### 业务影响 Business Impact
-
-**P1 - L0 级别告警的业务影响:**
-
-- **严重程度: 关键** - 可能导致核心业务中断
-- 直接影响订单、支付、会员等核心业务流程
-- 可能造成直接收入损失
-- 需要立即响应和处理
-
-**Severity: CRITICAL** - May cause core business interruption
-- Directly affects orders, payments, CRM core business processes
-- May cause direct revenue loss
-- Requires immediate response and handling
+**责任团队:** 风控团队负责处理此类告警。
 
 ---
 
-## 立即响应 Immediate Actions
+## 立即响应
 
-### 第一步: 确认告警 Step 1: Acknowledge Alert
+### 第一步: 评估黄金流程影响
+
+**立即评估此告警是否影响黄金流程（用户下单流程）:**
+
 ```
-1. 在监控系统中确认告警 / Acknowledge alert in monitoring system
-2. 记录告警时间和详情 / Record alert time and details
-3. 通知相关团队成员 / Notify relevant team members
+关键检查点:
+1. 用户是否可以正常打开瑞幸咖啡App
+2. 用户是否可以正常浏览菜单和选择商品
+3. 用户是否可以正常下单
+4. 用户是否可以正常支付
+
+如果以上任何一个环节受阻，说明黄金流程受影响!
 ```
 
-### 第二步: 初步评估 Step 2: Initial Assessment
+**如果黄金流程受影响:**
+- 这是严重事故，需要立即响应
+- 通知中国团队所有相关成员（包括半夜唤醒）
+- 启动紧急响应流程
+- 同步升级至Team Lead
+
+**如果黄金流程未受影响:**
+- 可以按正常流程排查
+- 观察告警是否自动恢复（部分告警可能是瞬时波动）
+- 记录并分析是否为误报
+
+### 第二步: 初步诊断
+
 ```
-1. 立即检查相关服务状态 / Immediately check related service status
-2. 评估业务影响范围 / Assess business impact scope
-3. 如有必要，启动应急响应流程 / Initiate emergency response if necessary
-4. 通知值班经理 / Notify on-call manager
+1. 检查告警详细信息
+2. 查看相关Grafana仪表板
+3. 收集诊断信息
+4. 检查最近变更记录
 ```
 
-### 第三步: 收集信息 Step 3: Gather Information
-```
-1. 检查告警详细信息 / Check alert details
-2. 查看相关Grafana仪表板 / View related Grafana dashboards
-3. 收集诊断信息 / Gather diagnostic information
-4. 检查最近变更记录 / Check recent change records
-```
+### 第三步: 深入排查
+
+如果告警持续存在且未自动恢复，执行以下诊断命令:
 
 ---
 
-## 诊断命令 Diagnostic Commands
+## 诊断命令
 
 ```bash
-# 检查风控服务状态 Check risk control service status
+# 检查风控服务状态
 kubectl get pods -n risk -o wide
-kubectl logs -n risk -l app=iriskcontrolservice --tail=100
 
-# 检查熔断器状态 Check circuit breaker status
-# 查看Grafana Dashboard: Risk Control Metrics
+# 检查风控服务日志
+kubectl logs -n risk -l app=risk-service --tail=100
 
-# 检查MongoDB状态 Check MongoDB status
-mongo --host [DOCDB_ENDPOINT] --eval "db.serverStatus()"
-
-# 检查RPC调用量 Check RPC call volume
-# 查看iZeus APM Dashboard
+# 检查风控熔断状态
+# 通过风控管理后台查看熔断规则和触发状态
 ```
 
 ---
 
-## 根因分析 Root Cause Analysis
+## 根因分析
 
-### 常见原因 Common Causes
+### 常见原因
 
-1. 异常流量激增 / Abnormal traffic surge
-2. 疑似攻击行为触发 / Suspected attack behavior triggered
-3. 下游服务响应超时 / Downstream service response timeout
-4. 策略配置过于敏感 / Policy configuration too sensitive
-5. 正常业务增长误触发 / Normal business growth false trigger
+1. 风控规则触发
+2. 异常流量攻击
+3. 业务逻辑异常
+4. 配置变更导致
+5. 上游服务异常
+6. 数据一致性问题
 
-### 排查清单 Investigation Checklist
+### 排查清单
 
-- [ ] 确认告警触发时间和频率 / Confirm alert trigger time and frequency
-- [ ] 检查相关服务健康状态 / Check related service health status
-- [ ] 验证数据库连接和性能 / Verify database connectivity and performance
-- [ ] 检查最近的部署或配置变更 / Check recent deployments or configuration changes
-- [ ] 分析相关日志是否有异常 / Analyze related logs for anomalies
-- [ ] 检查依赖服务状态 / Check dependent service status
-- [ ] 验证网络连接和延迟 / Verify network connectivity and latency
-- [ ] 检查资源使用情况(CPU/内存/磁盘) / Check resource usage (CPU/Memory/Disk)
-
----
-
-## 处理步骤 Resolution Steps
-
-### 通用排查流程 / General Troubleshooting
-
-**步骤 1:** 确认告警详情和影响范围 / Confirm alert details and impact scope
-
-**步骤 2:** 检查相关服务和依赖状态 / Check related services and dependency status
-
-**步骤 3:** 查看最近的变更记录 / Review recent change records
-
-**步骤 4:** 分析相关日志和指标 / Analyze related logs and metrics
-
-**步骤 5:** 根据根因实施修复措施 / Implement fix based on root cause
-
+- [ ] 确认告警触发时间和频率
+- [ ] 检查相关服务健康状态
+- [ ] 验证数据库/缓存连接和性能
+- [ ] 检查最近的部署或配置变更
+- [ ] 分析相关日志是否有异常
+- [ ] 检查依赖服务状态
+- [ ] 验证网络连接和延迟
+- [ ] 检查资源使用情况
 
 ---
 
-## 升级标准 Escalation Criteria
+## 处理步骤
 
-### 升级条件 When to Escalate
+### 通用处理步骤
 
-| 条件 Condition | 时间要求 Time Requirement | 升级目标 Escalation Target |
-|---------------|--------------------------|---------------------------|
-| 初次响应无法解决 / Initial response cannot resolve | 5分钟内 | L2 Support |
-| 问题持续恶化 / Issue continues to worsen | +10分钟 / +10 minutes | Team Lead |
-| 影响扩大到其他服务 / Impact spreads to other services | 立即 / Immediately | SRE On-Call |
-| 需要外部支持 / External support needed | 根据情况 / As needed | Vendor/AWS Support |
+**步骤 1:** 检查服务状态和日志
 
-### 升级联系方式 Escalation Contacts
+**步骤 2:** 分析告警触发原因
 
-| 角色 Role | 联系方式 Contact |
-|-----------|-----------------|
-| **主要负责团队 Primary Team** | Risk Control (风控) |
-| **On-Call** | risk-oncall@luckin.com |
-| **Slack Channel** | #risk-control-alerts |
-| **升级邮件 Escalation Email** | escalation@luckin.com |
-| **紧急热线 Emergency Hotline** | +1-XXX-XXX-XXXX |
+**步骤 3:** 根据具体情况采取相应措施
 
-### 升级时需提供信息 Information Required for Escalation
+**步骤 4:** 验证问题是否解决
 
-```
-1. 告警名称和ID / Alert name and ID: 【北美亚风控】场景熔断前预告警 (ALR-124)
-2. 告警触发时间 / Alert trigger time
-3. 当前状态 / Current status
-4. 已采取的措施 / Actions taken
-5. 影响范围评估 / Impact assessment
-6. 相关日志和指标截图 / Related logs and metric screenshots
-7. 诊断命令输出 / Diagnostic command output
-```
+**步骤 5:** 记录处理过程和经验
 
 ---
 
-## 预防措施 Prevention Measures
+## 升级标准
 
-- 实施主动监控和告警 / Implement proactive monitoring and alerting
-- 建立定期系统健康检查 / Establish regular system health checks
-- 实施变更管理流程 / Implement change management process
-- 进行容量规划和资源优化 / Conduct capacity planning and resource optimization
-- 建立事件响应和复盘机制 / Establish incident response and post-mortem process
+### 升级条件
+
+| 条件 | 升级目标 |
+|------|---------|
+| 初次响应无法解决 | DevOps值班成员 |
+| 问题持续恶化 | Team Lead |
+| 需要外部支持 | AWS/供应商支持 |
 
 ---
 
-## 相关告警 Related Alerts
+## 预防措施
+
+- 建立完善的监控体系
+- 定期进行容量规划
+- 实施自动化运维
+- 建立变更管理流程
+- 进行定期演练
+- 持续优化告警阈值
+
+---
+
+## 相关告警
 
 以下告警经常与此告警同时出现或有关联关系:
 
-The following alerts often appear together or are related to this alert:
-
-- `【北美亚风控】全局策略熔断告警`
-- `【北美风控】场景熔断告警`
-- `【DB告警】AWS Mongo CPU使用率连续三分钟大于90%`
+- `相关类别的其他告警`
+- `依赖服务的告警`
+- `资源使用相关告警`
 
 ---
 
-## Grafana 仪表板参考 Grafana Dashboard Reference
+## Grafana 仪表板参考
 
-| 仪表板 Dashboard | 用途 Purpose | 关联告警类型 Related Alert Types |
-|-----------------|--------------|--------------------------------|
-| RDS MySQL Overview | 数据库性能监控 | Database-RDS |
-| ElastiCache Redis | 缓存性能监控 | Database-Redis |
-| Kubernetes Pods | 容器监控 | Pod |
-| Node Exporter | VM/主机监控 | VM |
-| iZeus APM | 应用性能监控 | APM-iZeus |
-| DataLink Pipeline | ETL任务监控 | DataLink |
-| Business Metrics | 业务指标监控 | Business |
-| Risk Control | 风控监控 | Risk Control |
-| API Gateway | 网关监控 | Gateway |
-
----
-
-## 文档信息 Document Information
-
-| 属性 Attribute | 值 Value |
-|----------------|----------|
-| **版本 Version** | 1.0 |
-| **创建日期 Created** | 2026-01-14 |
-| **最后更新 Last Updated** | 2026-01-14 |
-| **文档负责人 Owner** | DevOps Team |
-| **审核状态 Review Status** | Approved |
-
----
-
-## 修订历史 Revision History
-
-| 版本 Version | 日期 Date | 作者 Author | 变更说明 Changes |
-|-------------|-----------|-------------|-----------------|
-| 1.0 | 2026-01-14 | DevOps Team | 初始版本 Initial version |
-
----
-
-> **备注 Note:** 本手册为标准操作程序(SOP)文档，请根据实际情况灵活处理。如有疑问，请联系相关团队负责人。
->
-> This handbook is a Standard Operating Procedure (SOP) document. Please handle flexibly according to actual situations. If you have any questions, please contact the relevant team leader.
+| 仪表板 | 用途 |
+|--------|------|
+| RDS MySQL Overview | 数据库性能监控 |
+| ElastiCache Redis | 缓存性能监控 |
+| Kubernetes Pods | 容器监控 |
+| Node Exporter | VM/主机监控 |
+| iZeus APM | 应用性能监控 |
+| DataLink Pipeline | ETL任务监控 |
+| Business Metrics | 业务指标监控 |
+| Risk Control | 风控监控 |
+| API Gateway | 网关监控 |
