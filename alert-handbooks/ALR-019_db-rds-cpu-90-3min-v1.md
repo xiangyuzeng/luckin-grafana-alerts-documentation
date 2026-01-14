@@ -26,6 +26,40 @@
 
 ---
 
+## 告警解析
+
+### 告警含义
+
+AWS RDS MySQL实例的CPU使用率连续3分钟超过90%，表明数据库负载过高。
+
+### 业务影响
+
+- **黄金流程影响**: 如果是salesorder-rw或salespayment-rw实例，将直接影响用户下单和支付
+- **服务降级**: 数据库响应延迟增加，可能导致API超时
+- **级联效应**: 连接池可能耗尽，导致其他服务无法获取数据库连接
+
+### 受影响服务
+
+订单服务、支付服务、会员服务、营销服务等依赖该数据库的所有微服务
+
+### PromQL表达式
+
+```promql
+aws_rds_cpuutilization_average offset 3m >= 90
+avg_over_time(aws_rds_cpuutilization_average[3m]) >= 90
+```
+
+### 常见根因
+
+1. **慢查询累积**: 未优化的SQL语句导致全表扫描
+2. **索引缺失**: 关键查询字段缺少索引
+3. **连接数暴增**: 应用侧连接池配置不当或流量突增
+4. **锁竞争**: 大事务或死锁导致资源等待
+5. **实例规格不足**: 业务增长超出当前实例容量
+6. **批量任务冲击**: 定时任务或数据同步任务在业务高峰期执行
+
+---
+
 ## 立即响应
 
 ### 第一步: 评估黄金流程影响
@@ -68,6 +102,91 @@
 
 ---
 
+
+## 系统访问方式
+
+### AWS控制台访问
+
+**AWS账号信息:**
+- **Account ID**: 257394478466
+- **Region**: us-east-1 (美东)
+- **控制台URL**: https://257394478466.signin.aws.amazon.com/console
+
+### AWS CLI访问
+
+**配置AWS CLI:**
+```bash
+# 确认当前AWS身份
+aws sts get-caller-identity
+
+# 确认区域配置
+aws configure get region
+# 应返回: us-east-1
+```
+
+### 数据库访问
+
+**RDS MySQL连接方式:**
+
+1. **通过JumpServer跳板机** (推荐):
+   - JumpServer地址: 联系DBA团队获取
+   - 使用SSH隧道或Web终端连接
+
+2. **通过MySQL客户端**:
+```bash
+# 连接示例 (需要在内网或VPN环境)
+mysql -h <RDS_ENDPOINT> -u <USERNAME> -p
+
+# 常用RDS端点:
+# 订单库: aws-luckyus-salesorder-rw.cxwu08m2qypw.us-east-1.rds.amazonaws.com
+# 支付库: aws-luckyus-salespayment-rw.cxwu08m2qypw.us-east-1.rds.amazonaws.com
+# 风控库: aws-luckyus-iriskcontrolservice-rw.cxwu08m2qypw.us-east-1.rds.amazonaws.com
+```
+
+### Redis访问
+
+**ElastiCache Redis连接方式:**
+
+```bash
+# 通过redis-cli连接 (需要在内网)
+redis-cli -h <REDIS_ENDPOINT> -p 6379
+
+# 常用Redis集群:
+# 订单缓存: luckyus-isales-order.xxxxx.use1.cache.amazonaws.com
+# 会话缓存: luckyus-session.xxxxx.use1.cache.amazonaws.com
+# 认证缓存: luckyus-unionauth.xxxxx.use1.cache.amazonaws.com
+```
+
+### Kubernetes访问
+
+**EKS集群访问:**
+```bash
+# 更新kubeconfig
+aws eks update-kubeconfig --name <CLUSTER_NAME> --region us-east-1
+
+# 查看Pod状态
+kubectl get pods -n <NAMESPACE>
+
+# 查看Pod日志
+kubectl logs -f <POD_NAME> -n <NAMESPACE>
+```
+
+### 监控系统访问
+
+**Grafana:**
+- 地址: 联系DevOps团队获取Grafana URL
+- 主要Datasource UID:
+  - MySQL指标: ff7hkeec6c9a8e
+  - Redis指标: ff6p0gjt24phce
+  - 主Prometheus: df8o21agxtkw0d
+
+**VMAlert配置:**
+- APM实例: 10.238.3.137:8880, 10.238.3.143:8880, 10.238.3.52:8880
+- Basic实例: 10.238.3.153:8880
+- 配置文件: `/etc/rules/alert_rules.json`
+
+---
+
 ## 诊断命令
 
 ```bash
@@ -95,16 +214,68 @@ mysql -h [RDS_ENDPOINT] -u admin -p -e "SHOW ENGINE INNODB STATUS\G"
 
 ---
 
+### 实时数据库诊断
+
+**关键RDS实例列表:**
+```
+aws-luckyus-salesorder-rw     - 订单主库 (L0核心)
+aws-luckyus-salespayment-rw   - 支付主库 (L0核心)
+aws-luckyus-iriskcontrolservice-rw - 风控主库
+aws-luckyus-framework01-rw    - 框架库01
+aws-luckyus-framework02-rw    - 框架库02
+```
+
+**查看所有RDS实例状态:**
+```bash
+aws rds describe-db-instances \
+  --query 'DBInstances[?starts_with(DBInstanceIdentifier, `aws-luckyus`)].{ID:DBInstanceIdentifier,Status:DBInstanceStatus,Class:DBInstanceClass,CPU:toString(EngineVersion)}' \
+  --output table
+```
+
+**查看特定实例的CPU指标:**
+```bash
+# 替换 INSTANCE_ID 为实际的实例ID
+aws cloudwatch get-metric-statistics \
+  --namespace AWS/RDS \
+  --metric-name CPUUtilization \
+  --dimensions Name=DBInstanceIdentifier,Value=aws-luckyus-salesorder-rw \
+  --start-time $(date -u -d '30 minutes ago' +%Y-%m-%dT%H:%M:%SZ) \
+  --end-time $(date -u +%Y-%m-%dT%H:%M:%SZ) \
+  --period 60 \
+  --statistics Average Maximum
+```
+
+**查看数据库连接数:**
+```bash
+aws cloudwatch get-metric-statistics \
+  --namespace AWS/RDS \
+  --metric-name DatabaseConnections \
+  --dimensions Name=DBInstanceIdentifier,Value=aws-luckyus-salesorder-rw \
+  --start-time $(date -u -d '30 minutes ago' +%Y-%m-%dT%H:%M:%SZ) \
+  --end-time $(date -u +%Y-%m-%dT%H:%M:%SZ) \
+  --period 60 \
+  --statistics Average Maximum
+```
+
 ## 根因分析
 
 ### 常见原因
 
-1. 复杂或未优化的SQL查询消耗过多资源
-2. 缺少索引导致全表扫描
-3. 并发连接数过高
-4. 锁等待或死锁问题
-5. 实例规格不足以支撑当前负载
-6. 大量慢查询累积
+1. **慢查询累积**: 未优化的SQL语句导致全表扫描
+2. **索引缺失**: 关键查询字段缺少索引
+3. **连接数暴增**: 应用侧连接池配置不当或流量突增
+4. **锁竞争**: 大事务或死锁导致资源等待
+5. **实例规格不足**: 业务增长超出当前实例容量
+6. **批量任务冲击**: 定时任务或数据同步任务在业务高峰期执行
+
+#### Luckin系统特定原因
+
+根据系统架构，以下是可能的特定原因:
+
+1. **核心服务影响**: 检查salesorder-rw、salespayment-rw等核心数据库
+2. **缓存层问题**: 检查luckyus-isales-order、luckyus-session等Redis集群
+3. **认证链路**: 检查unionauth相关服务和Redis
+4. **风控链路**: 检查iriskcontrol服务状态
 
 ### 排查清单
 

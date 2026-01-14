@@ -26,6 +26,37 @@
 
 ---
 
+## 告警解析
+
+### 告警含义
+
+Redis触发了Key淘汰机制，表明内存已达到maxmemory限制。
+
+### 业务影响
+
+- **缓存穿透**: 被淘汰的热点Key可能导致大量请求打到数据库
+- **数据丢失**: 重要缓存数据被淘汰
+- **业务异常**: 依赖缓存数据的业务逻辑异常
+
+### 受影响服务
+
+所有依赖缓存数据的服务
+
+### PromQL表达式
+
+```promql
+increase(redis_evicted_keys_total[1m]) > 0
+```
+
+### 常见根因
+
+1. **内存不足**: 实例内存配置不足
+2. **数据膨胀**: 缓存数据量超出预期
+3. **TTL问题**: 未设置合理的过期时间
+4. **maxmemory-policy**: 淘汰策略配置
+
+---
+
 ## 立即响应
 
 ### 第一步: 评估黄金流程影响
@@ -68,6 +99,91 @@
 
 ---
 
+
+## 系统访问方式
+
+### AWS控制台访问
+
+**AWS账号信息:**
+- **Account ID**: 257394478466
+- **Region**: us-east-1 (美东)
+- **控制台URL**: https://257394478466.signin.aws.amazon.com/console
+
+### AWS CLI访问
+
+**配置AWS CLI:**
+```bash
+# 确认当前AWS身份
+aws sts get-caller-identity
+
+# 确认区域配置
+aws configure get region
+# 应返回: us-east-1
+```
+
+### 数据库访问
+
+**RDS MySQL连接方式:**
+
+1. **通过JumpServer跳板机** (推荐):
+   - JumpServer地址: 联系DBA团队获取
+   - 使用SSH隧道或Web终端连接
+
+2. **通过MySQL客户端**:
+```bash
+# 连接示例 (需要在内网或VPN环境)
+mysql -h <RDS_ENDPOINT> -u <USERNAME> -p
+
+# 常用RDS端点:
+# 订单库: aws-luckyus-salesorder-rw.cxwu08m2qypw.us-east-1.rds.amazonaws.com
+# 支付库: aws-luckyus-salespayment-rw.cxwu08m2qypw.us-east-1.rds.amazonaws.com
+# 风控库: aws-luckyus-iriskcontrolservice-rw.cxwu08m2qypw.us-east-1.rds.amazonaws.com
+```
+
+### Redis访问
+
+**ElastiCache Redis连接方式:**
+
+```bash
+# 通过redis-cli连接 (需要在内网)
+redis-cli -h <REDIS_ENDPOINT> -p 6379
+
+# 常用Redis集群:
+# 订单缓存: luckyus-isales-order.xxxxx.use1.cache.amazonaws.com
+# 会话缓存: luckyus-session.xxxxx.use1.cache.amazonaws.com
+# 认证缓存: luckyus-unionauth.xxxxx.use1.cache.amazonaws.com
+```
+
+### Kubernetes访问
+
+**EKS集群访问:**
+```bash
+# 更新kubeconfig
+aws eks update-kubeconfig --name <CLUSTER_NAME> --region us-east-1
+
+# 查看Pod状态
+kubectl get pods -n <NAMESPACE>
+
+# 查看Pod日志
+kubectl logs -f <POD_NAME> -n <NAMESPACE>
+```
+
+### 监控系统访问
+
+**Grafana:**
+- 地址: 联系DevOps团队获取Grafana URL
+- 主要Datasource UID:
+  - MySQL指标: ff7hkeec6c9a8e
+  - Redis指标: ff6p0gjt24phce
+  - 主Prometheus: df8o21agxtkw0d
+
+**VMAlert配置:**
+- APM实例: 10.238.3.137:8880, 10.238.3.143:8880, 10.238.3.52:8880
+- Basic实例: 10.238.3.153:8880
+- 配置文件: `/etc/rules/alert_rules.json`
+
+---
+
 ## 诊断命令
 
 ```bash
@@ -87,16 +203,66 @@ redis-cli -h [REDIS_ENDPOINT] SLOWLOG GET 10
 
 ---
 
+### 实时数据库诊断
+
+**关键RDS实例列表:**
+```
+aws-luckyus-salesorder-rw     - 订单主库 (L0核心)
+aws-luckyus-salespayment-rw   - 支付主库 (L0核心)
+aws-luckyus-iriskcontrolservice-rw - 风控主库
+aws-luckyus-framework01-rw    - 框架库01
+aws-luckyus-framework02-rw    - 框架库02
+```
+
+**查看所有RDS实例状态:**
+```bash
+aws rds describe-db-instances \
+  --query 'DBInstances[?starts_with(DBInstanceIdentifier, `aws-luckyus`)].{ID:DBInstanceIdentifier,Status:DBInstanceStatus,Class:DBInstanceClass,CPU:toString(EngineVersion)}' \
+  --output table
+```
+
+**查看特定实例的CPU指标:**
+```bash
+# 替换 INSTANCE_ID 为实际的实例ID
+aws cloudwatch get-metric-statistics \
+  --namespace AWS/RDS \
+  --metric-name CPUUtilization \
+  --dimensions Name=DBInstanceIdentifier,Value=aws-luckyus-salesorder-rw \
+  --start-time $(date -u -d '30 minutes ago' +%Y-%m-%dT%H:%M:%SZ) \
+  --end-time $(date -u +%Y-%m-%dT%H:%M:%SZ) \
+  --period 60 \
+  --statistics Average Maximum
+```
+
+**查看数据库连接数:**
+```bash
+aws cloudwatch get-metric-statistics \
+  --namespace AWS/RDS \
+  --metric-name DatabaseConnections \
+  --dimensions Name=DBInstanceIdentifier,Value=aws-luckyus-salesorder-rw \
+  --start-time $(date -u -d '30 minutes ago' +%Y-%m-%dT%H:%M:%SZ) \
+  --end-time $(date -u +%Y-%m-%dT%H:%M:%SZ) \
+  --period 60 \
+  --statistics Average Maximum
+```
+
 ## 根因分析
 
 ### 常见原因
 
-1. 内存使用接近上限
-2. 大Key操作阻塞
-3. 客户端连接数过多
-4. 网络带宽瓶颈
-5. 持久化操作影响性能
-6. 热点Key导致负载不均
+1. **内存不足**: 实例内存配置不足
+2. **数据膨胀**: 缓存数据量超出预期
+3. **TTL问题**: 未设置合理的过期时间
+4. **maxmemory-policy**: 淘汰策略配置
+
+#### Luckin系统特定原因
+
+根据系统架构，以下是可能的特定原因:
+
+1. **核心服务影响**: 检查salesorder-rw、salespayment-rw等核心数据库
+2. **缓存层问题**: 检查luckyus-isales-order、luckyus-session等Redis集群
+3. **认证链路**: 检查unionauth相关服务和Redis
+4. **风控链路**: 检查iriskcontrol服务状态
 
 ### 排查清单
 

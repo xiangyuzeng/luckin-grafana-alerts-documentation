@@ -26,6 +26,37 @@
 
 ---
 
+## 告警解析
+
+### 告警含义
+
+五分钟内短信供应商调用失败次数超过阈值，短信发送可能受影响。
+
+### 业务影响
+
+- **验证码发送**: 用户无法收到验证码
+- **营销短信**: 营销活动短信无法发送
+- **通知服务**: 系统通知无法送达
+
+### 受影响服务
+
+短信服务、验证码服务、营销服务
+
+### PromQL表达式
+
+```promql
+sum_over_time(sms_provider_call_failures_total[5m]) > 50
+```
+
+### 常见根因
+
+1. **供应商故障**: 短信供应商服务异常
+2. **API限流**: 超过供应商API调用限制
+3. **配置问题**: API密钥或配置错误
+4. **网络问题**: 到供应商网络不通
+
+---
+
 ## 立即响应
 
 ### 第一步: 评估告警影响
@@ -60,6 +91,91 @@
 
 ---
 
+
+## 系统访问方式
+
+### AWS控制台访问
+
+**AWS账号信息:**
+- **Account ID**: 257394478466
+- **Region**: us-east-1 (美东)
+- **控制台URL**: https://257394478466.signin.aws.amazon.com/console
+
+### AWS CLI访问
+
+**配置AWS CLI:**
+```bash
+# 确认当前AWS身份
+aws sts get-caller-identity
+
+# 确认区域配置
+aws configure get region
+# 应返回: us-east-1
+```
+
+### 数据库访问
+
+**RDS MySQL连接方式:**
+
+1. **通过JumpServer跳板机** (推荐):
+   - JumpServer地址: 联系DBA团队获取
+   - 使用SSH隧道或Web终端连接
+
+2. **通过MySQL客户端**:
+```bash
+# 连接示例 (需要在内网或VPN环境)
+mysql -h <RDS_ENDPOINT> -u <USERNAME> -p
+
+# 常用RDS端点:
+# 订单库: aws-luckyus-salesorder-rw.cxwu08m2qypw.us-east-1.rds.amazonaws.com
+# 支付库: aws-luckyus-salespayment-rw.cxwu08m2qypw.us-east-1.rds.amazonaws.com
+# 风控库: aws-luckyus-iriskcontrolservice-rw.cxwu08m2qypw.us-east-1.rds.amazonaws.com
+```
+
+### Redis访问
+
+**ElastiCache Redis连接方式:**
+
+```bash
+# 通过redis-cli连接 (需要在内网)
+redis-cli -h <REDIS_ENDPOINT> -p 6379
+
+# 常用Redis集群:
+# 订单缓存: luckyus-isales-order.xxxxx.use1.cache.amazonaws.com
+# 会话缓存: luckyus-session.xxxxx.use1.cache.amazonaws.com
+# 认证缓存: luckyus-unionauth.xxxxx.use1.cache.amazonaws.com
+```
+
+### Kubernetes访问
+
+**EKS集群访问:**
+```bash
+# 更新kubeconfig
+aws eks update-kubeconfig --name <CLUSTER_NAME> --region us-east-1
+
+# 查看Pod状态
+kubectl get pods -n <NAMESPACE>
+
+# 查看Pod日志
+kubectl logs -f <POD_NAME> -n <NAMESPACE>
+```
+
+### 监控系统访问
+
+**Grafana:**
+- 地址: 联系DevOps团队获取Grafana URL
+- 主要Datasource UID:
+  - MySQL指标: ff7hkeec6c9a8e
+  - Redis指标: ff6p0gjt24phce
+  - 主Prometheus: df8o21agxtkw0d
+
+**VMAlert配置:**
+- APM实例: 10.238.3.137:8880, 10.238.3.143:8880, 10.238.3.52:8880
+- Basic实例: 10.238.3.153:8880
+- 配置文件: `/etc/rules/alert_rules.json`
+
+---
+
 ## 诊断命令
 
 ```bash
@@ -79,12 +195,19 @@ kubectl logs -n upush -l app=upush-service --tail=100
 
 ### 常见原因
 
-1. 短信通道故障
-2. 运营商限流
-3. 内容被过滤
-4. 账户余额不足
-5. 网络连接问题
-6. 服务实例异常
+1. **供应商故障**: 短信供应商服务异常
+2. **API限流**: 超过供应商API调用限制
+3. **配置问题**: API密钥或配置错误
+4. **网络问题**: 到供应商网络不通
+
+#### Luckin系统特定原因
+
+根据系统架构，以下是可能的特定原因:
+
+1. **核心服务影响**: 检查salesorder-rw、salespayment-rw等核心数据库
+2. **缓存层问题**: 检查luckyus-isales-order、luckyus-session等Redis集群
+3. **认证链路**: 检查unionauth相关服务和Redis
+4. **风控链路**: 检查iriskcontrol服务状态
 
 ### 排查清单
 

@@ -26,6 +26,37 @@
 
 ---
 
+## 告警解析
+
+### 告警含义
+
+API网关错误率超过15%，大量请求返回5xx错误。
+
+### 业务影响
+
+- **服务降级**: 大量用户请求失败
+- **用户体验**: App功能不可用
+- **级联故障**: 可能是后端服务问题的表现
+
+### 受影响服务
+
+通过网关的所有API服务
+
+### PromQL表达式
+
+```promql
+(sum(rate(gateway_requests_total{status=~"5.."}[1m])) / sum(rate(gateway_requests_total[1m]))) * 100 > 15
+```
+
+### 常见根因
+
+1. **后端服务故障**: 上游服务不可用
+2. **网关配置**: 路由配置错误
+3. **容量问题**: 网关实例资源不足
+4. **网络问题**: 网关到后端服务网络异常
+
+---
+
 ## 立即响应
 
 ### 第一步: 评估黄金流程影响
@@ -68,6 +99,91 @@
 
 ---
 
+
+## 系统访问方式
+
+### AWS控制台访问
+
+**AWS账号信息:**
+- **Account ID**: 257394478466
+- **Region**: us-east-1 (美东)
+- **控制台URL**: https://257394478466.signin.aws.amazon.com/console
+
+### AWS CLI访问
+
+**配置AWS CLI:**
+```bash
+# 确认当前AWS身份
+aws sts get-caller-identity
+
+# 确认区域配置
+aws configure get region
+# 应返回: us-east-1
+```
+
+### 数据库访问
+
+**RDS MySQL连接方式:**
+
+1. **通过JumpServer跳板机** (推荐):
+   - JumpServer地址: 联系DBA团队获取
+   - 使用SSH隧道或Web终端连接
+
+2. **通过MySQL客户端**:
+```bash
+# 连接示例 (需要在内网或VPN环境)
+mysql -h <RDS_ENDPOINT> -u <USERNAME> -p
+
+# 常用RDS端点:
+# 订单库: aws-luckyus-salesorder-rw.cxwu08m2qypw.us-east-1.rds.amazonaws.com
+# 支付库: aws-luckyus-salespayment-rw.cxwu08m2qypw.us-east-1.rds.amazonaws.com
+# 风控库: aws-luckyus-iriskcontrolservice-rw.cxwu08m2qypw.us-east-1.rds.amazonaws.com
+```
+
+### Redis访问
+
+**ElastiCache Redis连接方式:**
+
+```bash
+# 通过redis-cli连接 (需要在内网)
+redis-cli -h <REDIS_ENDPOINT> -p 6379
+
+# 常用Redis集群:
+# 订单缓存: luckyus-isales-order.xxxxx.use1.cache.amazonaws.com
+# 会话缓存: luckyus-session.xxxxx.use1.cache.amazonaws.com
+# 认证缓存: luckyus-unionauth.xxxxx.use1.cache.amazonaws.com
+```
+
+### Kubernetes访问
+
+**EKS集群访问:**
+```bash
+# 更新kubeconfig
+aws eks update-kubeconfig --name <CLUSTER_NAME> --region us-east-1
+
+# 查看Pod状态
+kubectl get pods -n <NAMESPACE>
+
+# 查看Pod日志
+kubectl logs -f <POD_NAME> -n <NAMESPACE>
+```
+
+### 监控系统访问
+
+**Grafana:**
+- 地址: 联系DevOps团队获取Grafana URL
+- 主要Datasource UID:
+  - MySQL指标: ff7hkeec6c9a8e
+  - Redis指标: ff6p0gjt24phce
+  - 主Prometheus: df8o21agxtkw0d
+
+**VMAlert配置:**
+- APM实例: 10.238.3.137:8880, 10.238.3.143:8880, 10.238.3.52:8880
+- Basic实例: 10.238.3.153:8880
+- 配置文件: `/etc/rules/alert_rules.json`
+
+---
+
 ## 诊断命令
 
 ```bash
@@ -87,12 +203,19 @@ kubectl logs -n gateway -l app=luckyapigateway --tail=100
 
 ### 常见原因
 
-1. 后端服务异常
-2. 网络连接问题
-3. 配置错误
-4. 证书过期
-5. 限流策略触发
-6. 负载不均衡
+1. **后端服务故障**: 上游服务不可用
+2. **网关配置**: 路由配置错误
+3. **容量问题**: 网关实例资源不足
+4. **网络问题**: 网关到后端服务网络异常
+
+#### Luckin系统特定原因
+
+根据系统架构，以下是可能的特定原因:
+
+1. **核心服务影响**: 检查salesorder-rw、salespayment-rw等核心数据库
+2. **缓存层问题**: 检查luckyus-isales-order、luckyus-session等Redis集群
+3. **认证链路**: 检查unionauth相关服务和Redis
+4. **风控链路**: 检查iriskcontrol服务状态
 
 ### 排查清单
 
