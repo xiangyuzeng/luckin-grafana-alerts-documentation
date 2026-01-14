@@ -24,8 +24,6 @@
 
 此告警属于 **P1** 优先级，影响 **L1** 级别服务。
 
-**责任团队:** 数据链路团队负责处理此类告警。
-
 ---
 
 ## 立即响应
@@ -68,60 +66,16 @@
 
 ## 诊断命令
 
-### 通用 Prometheus 指标查询
-```promql
-# 节点 CPU 使用率
-100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)
-
-# 节点内存使用率
-(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100
-
-# 节点磁盘使用率
-(1 - (node_filesystem_avail_bytes / node_filesystem_size_bytes)) * 100
-```
-
-### 通用诊断命令
 ```bash
-# 检查服务健康状态
-curl -s http://[SERVICE_ENDPOINT]/health
+# 检查DataLink任务状态
+# 通过DataLink管理后台查看任务执行状态
 
-# 检查网络连通性
-ping [TARGET_HOST]
-telnet [TARGET_HOST] [PORT]
+# 检查Kafka消费者延迟
+kafka-consumer-groups.sh --bootstrap-server [KAFKA_BROKER] --describe --group [GROUP_NAME]
 
-# 检查日志
-kubectl logs [POD_NAME] -n [NAMESPACE] --tail=100
+# 检查Flink作业状态
+# 通过Flink Dashboard查看作业运行状态
 ```
-
----
-
-## 诊断命令
-
-### 通用 Prometheus 指标查询
-```promql
-# 节点 CPU 使用率
-100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)
-
-# 节点内存使用率
-(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100
-
-# 节点磁盘使用率
-(1 - (node_filesystem_avail_bytes / node_filesystem_size_bytes)) * 100
-```
-
-### 通用诊断命令
-```bash
-# 检查服务健康状态
-curl -s http://[SERVICE_ENDPOINT]/health
-
-# 检查网络连通性
-ping [TARGET_HOST]
-telnet [TARGET_HOST] [PORT]
-
-# 检查日志
-kubectl logs [POD_NAME] -n [NAMESPACE] --tail=100
-```
-
 
 ---
 
@@ -195,19 +149,3 @@ kubectl logs [POD_NAME] -n [NAMESPACE] --tail=100
 - `相关类别的其他告警`
 - `依赖服务的告警`
 - `资源使用相关告警`
-
----
-
-## Grafana 仪表板参考
-
-| 仪表板 | 用途 |
-|--------|------|
-| [Kubernetes Pods Dashboard](https://luckin-na-grafana.lkcoffee.com/d/kubernetes-pods) | Kubernetes 监控 |
-| [Node Exporter Full](https://luckin-na-grafana.lkcoffee.com/d/node-exporter-full) | Node Exporter 监控 |
-
-**Grafana 访问地址:** https://luckin-na-grafana.lkcoffee.com
-
-**Prometheus 数据源:**
-- MySQL 指标: `ff7hkeec6c9a8e`
-- Redis 指标: `ff6p0gjt24phce`
-- 默认指标: `df8o21agxtkw0d`

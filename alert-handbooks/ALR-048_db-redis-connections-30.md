@@ -24,12 +24,6 @@
 
 此告警属于 **P2** 优先级，影响 **L1** 级别服务。
 
-**责任团队:** DBA团队负责处理此类告警。
-
-**系统上下文:** 此告警涉及 6 个关键 MySQL 数据库实例。
-
-**系统上下文:** 此告警涉及 6 个关键 MySQL 数据库实例。
-
 ---
 
 ## 立即响应
@@ -68,160 +62,20 @@
 
 ## 诊断命令
 
-### AWS ElastiCache 状态检查
 ```bash
-# 检查所有 Luckin US ElastiCache 集群
+# 检查ElastiCache集群状态
 aws elasticache describe-cache-clusters \
-  --query 'CacheClusters[?starts_with(CacheClusterId, `luckyus`)].{ID:CacheClusterId,Status:CacheClusterStatus,Engine:Engine,NodeType:CacheNodeType}' \
-  --output table
+  --show-cache-node-info
 
-# 检查复制组状态
-aws elasticache describe-replication-groups \
-  --query 'ReplicationGroups[?starts_with(ReplicationGroupId, `luckyus`)].{ID:ReplicationGroupId,Status:Status,NodeType:CacheNodeType}' \
-  --output table
+# 检查Redis内存使用
+redis-cli -h [REDIS_ENDPOINT] INFO memory
+
+# 检查Redis客户端连接
+redis-cli -h [REDIS_ENDPOINT] CLIENT LIST
+
+# 检查Redis慢日志
+redis-cli -h [REDIS_ENDPOINT] SLOWLOG GET 10
 ```
-
-### Prometheus 指标查询 (Grafana Explore)
-```promql
-# 连接客户端数
-redis_connected_clients
-
-# 阻塞客户端数
-redis_blocked_clients
-
-# 内存使用量
-redis_memory_used_bytes
-
-# CPU 使用率
-rate(redis_cpu_user_seconds_total[5m]) + rate(redis_cpu_sys_seconds_total[5m])
-
-# 命令处理速率
-rate(redis_commands_total[5m])
-
-# 慢日志长度
-redis_slowlog_length
-
-# 命中率计算
-rate(redis_keyspace_hits_total[5m]) / (rate(redis_keyspace_hits_total[5m]) + rate(redis_keyspace_misses_total[5m]))
-```
-
-### Redis CLI 诊断命令
-```bash
-# 连接到 Redis (使用正确的端点)
-redis-cli -h [REDIS_ENDPOINT] -p 6379 --tls
-
-# 查看实时统计
-INFO
-
-# 查看内存使用
-INFO memory
-
-# 查看客户端连接
-CLIENT LIST
-
-# 查看慢日志
-SLOWLOG GET 10
-
-# 查看键空间统计
-INFO keyspace
-```
-
-### 关键 Redis 集群
-**黄金流程相关:**
-- luckyus-isales-order
-- luckyus-isales-session
-- luckyus-isales-commodity
-- luckyus-isales-crm
-- luckyus-isales-market
-- luckyus-isales-member
-
-**认证相关:**
-- luckyus-unionauth
-- luckyus-aapi-unionauth
-- luckyus-sapi-unionauth
-- luckyus-open-unionauth
-- luckyus-auth
-- luckyus-authservice
-
----
-
-## 诊断命令
-
-### AWS ElastiCache 状态检查
-```bash
-# 检查所有 Luckin US ElastiCache 集群
-aws elasticache describe-cache-clusters \
-  --query 'CacheClusters[?starts_with(CacheClusterId, `luckyus`)].{ID:CacheClusterId,Status:CacheClusterStatus,Engine:Engine,NodeType:CacheNodeType}' \
-  --output table
-
-# 检查复制组状态
-aws elasticache describe-replication-groups \
-  --query 'ReplicationGroups[?starts_with(ReplicationGroupId, `luckyus`)].{ID:ReplicationGroupId,Status:Status,NodeType:CacheNodeType}' \
-  --output table
-```
-
-### Prometheus 指标查询 (Grafana Explore)
-```promql
-# 连接客户端数
-redis_connected_clients
-
-# 阻塞客户端数
-redis_blocked_clients
-
-# 内存使用量
-redis_memory_used_bytes
-
-# CPU 使用率
-rate(redis_cpu_user_seconds_total[5m]) + rate(redis_cpu_sys_seconds_total[5m])
-
-# 命令处理速率
-rate(redis_commands_total[5m])
-
-# 慢日志长度
-redis_slowlog_length
-
-# 命中率计算
-rate(redis_keyspace_hits_total[5m]) / (rate(redis_keyspace_hits_total[5m]) + rate(redis_keyspace_misses_total[5m]))
-```
-
-### Redis CLI 诊断命令
-```bash
-# 连接到 Redis (使用正确的端点)
-redis-cli -h [REDIS_ENDPOINT] -p 6379 --tls
-
-# 查看实时统计
-INFO
-
-# 查看内存使用
-INFO memory
-
-# 查看客户端连接
-CLIENT LIST
-
-# 查看慢日志
-SLOWLOG GET 10
-
-# 查看键空间统计
-INFO keyspace
-```
-
-### 关键 Redis 集群
-**黄金流程相关:**
-- luckyus-isales-order
-- luckyus-isales-session
-- luckyus-isales-commodity
-- luckyus-isales-crm
-- luckyus-isales-market
-- luckyus-isales-member
-
-**认证相关:**
-- luckyus-unionauth
-- luckyus-aapi-unionauth
-- luckyus-sapi-unionauth
-- luckyus-open-unionauth
-- luckyus-auth
-- luckyus-authservice
-
 
 ---
 
@@ -307,20 +161,3 @@ INFO keyspace
 - `【Redis告警】ElastiCache 延迟超过2ms`
 - `【Redis告警】ElastiCache Key驱逐告警`
 - `【Redis告警】ElastiCache 客户端阻塞`
-
----
-
-## Grafana 仪表板参考
-
-| 仪表板 | 用途 |
-|--------|------|
-| [ElastiCache Redis Overview](https://luckin-na-grafana.lkcoffee.com/d/elasticache-redis-overview) | Elasticache 监控 |
-| [Redis Cluster Monitor](https://luckin-na-grafana.lkcoffee.com/d/redis-cluster-monitor) | Redis Cluster 监控 |
-| [Kubernetes Pods Dashboard](https://luckin-na-grafana.lkcoffee.com/d/kubernetes-pods) | 容器监控 |
-
-**Grafana 访问地址:** https://luckin-na-grafana.lkcoffee.com
-
-**Prometheus 数据源:**
-- MySQL 指标: `ff7hkeec6c9a8e`
-- Redis 指标: `ff6p0gjt24phce`
-- 默认指标: `df8o21agxtkw0d`

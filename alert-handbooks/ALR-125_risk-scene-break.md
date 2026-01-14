@@ -24,12 +24,6 @@
 
 此告警属于 **P0** 优先级，影响 **L0** 级别服务。
 
-**责任团队:** 风控团队负责处理此类告警。
-
-**系统上下文:** 此告警涉及 2 个关键 MySQL 数据库实例。Kubernetes 命名空间: baseservices-riskcontrol。
-
-**系统上下文:** 此告警涉及 2 个关键 MySQL 数据库实例。Kubernetes 命名空间: baseservices-riskcontrol。
-
 ---
 
 ## 立即响应
@@ -76,60 +70,16 @@
 
 ## 诊断命令
 
-### 通用 Prometheus 指标查询
-```promql
-# 节点 CPU 使用率
-100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)
-
-# 节点内存使用率
-(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100
-
-# 节点磁盘使用率
-(1 - (node_filesystem_avail_bytes / node_filesystem_size_bytes)) * 100
-```
-
-### 通用诊断命令
 ```bash
-# 检查服务健康状态
-curl -s http://[SERVICE_ENDPOINT]/health
+# 检查风控服务状态
+kubectl get pods -n risk -o wide
 
-# 检查网络连通性
-ping [TARGET_HOST]
-telnet [TARGET_HOST] [PORT]
+# 检查风控服务日志
+kubectl logs -n risk -l app=risk-service --tail=100
 
-# 检查日志
-kubectl logs [POD_NAME] -n [NAMESPACE] --tail=100
+# 检查风控熔断状态
+# 通过风控管理后台查看熔断规则和触发状态
 ```
-
----
-
-## 诊断命令
-
-### 通用 Prometheus 指标查询
-```promql
-# 节点 CPU 使用率
-100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)
-
-# 节点内存使用率
-(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100
-
-# 节点磁盘使用率
-(1 - (node_filesystem_avail_bytes / node_filesystem_size_bytes)) * 100
-```
-
-### 通用诊断命令
-```bash
-# 检查服务健康状态
-curl -s http://[SERVICE_ENDPOINT]/health
-
-# 检查网络连通性
-ping [TARGET_HOST]
-telnet [TARGET_HOST] [PORT]
-
-# 检查日志
-kubectl logs [POD_NAME] -n [NAMESPACE] --tail=100
-```
-
 
 ---
 
@@ -203,19 +153,3 @@ kubectl logs [POD_NAME] -n [NAMESPACE] --tail=100
 - `相关类别的其他告警`
 - `依赖服务的告警`
 - `资源使用相关告警`
-
----
-
-## Grafana 仪表板参考
-
-| 仪表板 | 用途 |
-|--------|------|
-| [Risk Control Monitor](https://luckin-na-grafana.lkcoffee.com/d/risk-control-monitor) | Risk Control 监控 |
-| [Kubernetes Pods Dashboard](https://luckin-na-grafana.lkcoffee.com/d/kubernetes-pods) | 容器监控 |
-
-**Grafana 访问地址:** https://luckin-na-grafana.lkcoffee.com
-
-**Prometheus 数据源:**
-- MySQL 指标: `ff7hkeec6c9a8e`
-- Redis 指标: `ff6p0gjt24phce`
-- 默认指标: `df8o21agxtkw0d`
