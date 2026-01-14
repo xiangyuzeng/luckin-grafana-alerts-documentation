@@ -26,6 +26,8 @@
 
 **责任团队:** DBA团队负责处理此类告警。
 
+**系统上下文:** 此告警涉及 6 个关键 MySQL 数据库实例。
+
 ---
 
 ## 立即响应
@@ -68,19 +70,73 @@
 
 ## 诊断命令
 
+### AWS RDS 状态检查
 ```bash
-# 检查DocumentDB集群状态
-aws docdb describe-db-clusters
+# 检查所有 Luckin US RDS 实例状态
+aws rds describe-db-instances \
+  --query 'DBInstances[?starts_with(DBInstanceIdentifier, `luckyus`)].{ID:DBInstanceIdentifier,Status:DBInstanceStatus,Class:DBInstanceClass,Engine:Engine,Storage:AllocatedStorage}' \
+  --output table
 
-# 检查DocumentDB实例状态
-aws docdb describe-db-instances
-
-# 检查MongoDB当前操作
-mongo --host [DOCDB_ENDPOINT] --eval "db.currentOp()"
-
-# 检查MongoDB服务器状态
-mongo --host [DOCDB_ENDPOINT] --eval "db.serverStatus()"
+# 检查特定实例的性能指标 (替换 INSTANCE_ID)
+aws cloudwatch get-metric-statistics \
+  --namespace AWS/RDS \
+  --metric-name CPUUtilization \
+  --dimensions Name=DBInstanceIdentifier,Value=[INSTANCE_ID] \
+  --start-time $(date -u -d '1 hour ago' +%Y-%m-%dT%H:%M:%SZ) \
+  --end-time $(date -u +%Y-%m-%dT%H:%M:%SZ) \
+  --period 300 \
+  --statistics Average Maximum
 ```
+
+### Prometheus 指标查询 (Grafana Explore)
+```promql
+# 慢查询速率 (每秒)
+sum(rate(mysql_global_status_slow_queries[5m])) by (instance)
+
+# 活跃连接数
+mysql_global_status_threads_connected
+
+# 运行中线程数
+mysql_global_status_threads_running
+
+# VIP 健康检查
+mysql_check_vip
+```
+
+### MySQL 诊断命令
+```sql
+-- 查看当前进程列表
+SHOW PROCESSLIST;
+
+-- 查看完整进程列表 (包含完整SQL)
+SHOW FULL PROCESSLIST;
+
+-- 检查InnoDB状态
+SHOW ENGINE INNODB STATUS;
+
+-- 检查慢查询日志状态
+SHOW VARIABLES LIKE 'slow_query%';
+
+-- 查看连接状态
+SHOW STATUS LIKE 'Threads_%';
+SHOW STATUS LIKE 'Connections';
+
+-- 检查锁等待
+SELECT * FROM information_schema.innodb_lock_waits;
+```
+
+### 关键数据库实例
+**黄金流程相关:**
+- aws-luckyus-salesorder-rw
+- aws-luckyus-salespayment-rw
+- aws-luckyus-salescrm-rw
+- aws-luckyus-salescommodity-rw
+- aws-luckyus-salesmarket-rw
+- aws-luckyus-salesmember-rw
+
+**风控相关:**
+- aws-luckyus-iriskcontrolservice-rw
+- aws-luckyus-iriskcontrol-rw
 
 ---
 
@@ -160,12 +216,16 @@ mongo --host [DOCDB_ENDPOINT] --eval "db.serverStatus()"
 
 | 仪表板 | 用途 |
 |--------|------|
-| RDS MySQL Overview | 数据库性能监控 |
-| ElastiCache Redis | 缓存性能监控 |
-| Kubernetes Pods | 容器监控 |
-| Node Exporter | VM/主机监控 |
-| iZeus APM | 应用性能监控 |
-| DataLink Pipeline | ETL任务监控 |
-| Business Metrics | 业务指标监控 |
-| Risk Control | 风控监控 |
-| API Gateway | 网关监控 |
+| [Enterprise RDS Health Dashboard](https://luckin-na-grafana.lkcoffee.com/d/enterprise-rds-health) | Rds 监控 |
+| [MySQL Enterprise Monitoring Dashboard](https://luckin-na-grafana.lkcoffee.com/d/mysql-enterprise-monitor) | Mysql Overview 监控 |
+| [InnoDB Deep Monitoring](https://luckin-na-grafana.lkcoffee.com/d/innodb-deep-monitor) | Mysql Innodb 监控 |
+| [NA Weekly Slow SQL Governance](https://luckin-na-grafana.lkcoffee.com/d/na-slow-sql-governance) | Slow Sql 监控 |
+| [NA DB Instance Deep Dive](https://luckin-na-grafana.lkcoffee.com/d/na-db-instance-deep-dive) | Db Deep Dive 监控 |
+| [Kubernetes Pods Dashboard](https://luckin-na-grafana.lkcoffee.com/d/kubernetes-pods) | 容器监控 |
+
+**Grafana 访问地址:** https://luckin-na-grafana.lkcoffee.com
+
+**Prometheus 数据源:**
+- MySQL 指标: `ff7hkeec6c9a8e`
+- Redis 指标: `ff6p0gjt24phce`
+- 默认指标: `df8o21agxtkw0d`

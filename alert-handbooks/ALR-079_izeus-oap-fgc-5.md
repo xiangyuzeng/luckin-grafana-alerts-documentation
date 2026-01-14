@@ -26,6 +26,10 @@
 
 **责任团队:** APM团队负责处理此类告警。
 
+**系统上下文:** 此告警涉及 Kubernetes 命名空间: rd-sales, rd-finance。
+
+**系统上下文:** 此告警涉及 Kubernetes 命名空间: rd-sales, rd-finance。
+
 ---
 
 ## 立即响应
@@ -68,16 +72,76 @@
 
 ## 诊断命令
 
-```bash
-# 检查相关服务状态
-kubectl get pods -A | grep -i [SERVICE_NAME]
+### Prometheus 指标查询 (Grafana Explore)
+```promql
+# GC 暂停时间
+rate(jvm_gc_pause_seconds_sum[5m])
 
-# 检查服务日志
-kubectl logs -n [NAMESPACE] [POD_NAME] --tail=100
+# JVM 内存使用
+jvm_memory_used_bytes
 
-# 检查Grafana仪表板
-# 访问相关监控仪表板查看详细指标
+# 活跃线程数
+jvm_threads_live_threads
+
+# 守护线程数
+jvm_threads_daemon_threads
+
+# 堆内存使用率
+jvm_memory_used_bytes{area="heap"} / jvm_memory_max_bytes{area="heap"} * 100
 ```
+
+### JVM 诊断命令
+```bash
+# 获取堆转储 (在容器内)
+kubectl exec -it [POD_NAME] -n [NAMESPACE] -- jmap -dump:format=b,file=/tmp/heapdump.hprof [PID]
+
+# 查看线程转储
+kubectl exec -it [POD_NAME] -n [NAMESPACE] -- jstack [PID]
+
+# 查看 GC 日志
+kubectl logs [POD_NAME] -n [NAMESPACE] | grep -i "gc"
+
+# 查看 JVM 参数
+kubectl exec -it [POD_NAME] -n [NAMESPACE] -- java -XX:+PrintFlagsFinal -version
+```
+
+---
+
+## 诊断命令
+
+### Prometheus 指标查询 (Grafana Explore)
+```promql
+# GC 暂停时间
+rate(jvm_gc_pause_seconds_sum[5m])
+
+# JVM 内存使用
+jvm_memory_used_bytes
+
+# 活跃线程数
+jvm_threads_live_threads
+
+# 守护线程数
+jvm_threads_daemon_threads
+
+# 堆内存使用率
+jvm_memory_used_bytes{area="heap"} / jvm_memory_max_bytes{area="heap"} * 100
+```
+
+### JVM 诊断命令
+```bash
+# 获取堆转储 (在容器内)
+kubectl exec -it [POD_NAME] -n [NAMESPACE] -- jmap -dump:format=b,file=/tmp/heapdump.hprof [PID]
+
+# 查看线程转储
+kubectl exec -it [POD_NAME] -n [NAMESPACE] -- jstack [PID]
+
+# 查看 GC 日志
+kubectl logs [POD_NAME] -n [NAMESPACE] | grep -i "gc"
+
+# 查看 JVM 参数
+kubectl exec -it [POD_NAME] -n [NAMESPACE] -- java -XX:+PrintFlagsFinal -version
+```
+
 
 ---
 
@@ -158,12 +222,12 @@ kubectl logs -n [NAMESPACE] [POD_NAME] --tail=100
 
 | 仪表板 | 用途 |
 |--------|------|
-| RDS MySQL Overview | 数据库性能监控 |
-| ElastiCache Redis | 缓存性能监控 |
-| Kubernetes Pods | 容器监控 |
-| Node Exporter | VM/主机监控 |
-| iZeus APM | 应用性能监控 |
-| DataLink Pipeline | ETL任务监控 |
-| Business Metrics | 业务指标监控 |
-| Risk Control | 风控监控 |
-| API Gateway | 网关监控 |
+| [JVM Micrometer Dashboard](https://luckin-na-grafana.lkcoffee.com/d/jvm-micrometer) | Jvm Overview 监控 |
+| [Kubernetes Pods Dashboard](https://luckin-na-grafana.lkcoffee.com/d/kubernetes-pods) | Kubernetes 监控 |
+
+**Grafana 访问地址:** https://luckin-na-grafana.lkcoffee.com
+
+**Prometheus 数据源:**
+- MySQL 指标: `ff7hkeec6c9a8e`
+- Redis 指标: `ff6p0gjt24phce`
+- 默认指标: `df8o21agxtkw0d`

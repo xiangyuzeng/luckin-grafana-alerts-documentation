@@ -26,6 +26,10 @@
 
 **责任团队:** DevOps团队负责处理此类告警。
 
+**系统上下文:** 此告警涉及 Kubernetes 命名空间: rd-sales, rd-finance, rd-supplychains。
+
+**系统上下文:** 此告警涉及 Kubernetes 命名空间: rd-sales, rd-finance, rd-supplychains。
+
 ---
 
 ## 立即响应
@@ -72,22 +76,114 @@
 
 ## 诊断命令
 
+### kubectl 诊断命令
 ```bash
-# 检查Pod状态
-kubectl get pods -n [NAMESPACE] -o wide
+# 查看所有命名空间的 Pod 状态
+kubectl get pods -A | grep -E "(rd-|baseservices-)"
 
-# 检查Pod日志
-kubectl logs -n [NAMESPACE] [POD_NAME] --tail=100
+# 查看特定命名空间的 Pod 详情
+kubectl get pods -n rd-sales -o wide
+kubectl get pods -n rd-finance -o wide
 
-# 检查Pod详情
-kubectl describe pod -n [NAMESPACE] [POD_NAME]
+# 查看 Pod 事件
+kubectl describe pod [POD_NAME] -n [NAMESPACE]
 
-# 检查Pod资源使用
+# 查看 Pod 日志
+kubectl logs [POD_NAME] -n [NAMESPACE] --tail=100
+
+# 查看资源使用情况
 kubectl top pods -n [NAMESPACE]
-
-# 检查Node资源
 kubectl top nodes
 ```
+
+### Prometheus 指标查询 (Grafana Explore)
+```promql
+# 容器 CPU 使用率
+sum(rate(container_cpu_usage_seconds_total{namespace=~"rd-.*|baseservices-.*"}[5m])) by (namespace, pod)
+
+# 容器内存使用量
+sum(container_memory_working_set_bytes{namespace=~"rd-.*|baseservices-.*"}) by (namespace, pod)
+
+# 容器重启次数 (过去1小时)
+sum(increase(kube_pod_container_status_restarts_total[1h])) by (namespace, pod)
+
+# OOM 事件
+sum(increase(container_oom_events_total[1h])) by (namespace, pod)
+
+# Pod 状态
+kube_pod_status_phase
+
+# Deployment 可用副本
+kube_deployment_status_replicas_available
+```
+
+### 关键命名空间
+**业务服务:**
+- 销售: `rd-sales`
+- 财务: `rd-finance`
+- 供应链: `rd-supplychains`
+
+**基础服务:**
+- 风控: `baseservices-riskcontrol`
+- API网关: `api-gateway`
+- 监控: `monitor`
+
+---
+
+## 诊断命令
+
+### kubectl 诊断命令
+```bash
+# 查看所有命名空间的 Pod 状态
+kubectl get pods -A | grep -E "(rd-|baseservices-)"
+
+# 查看特定命名空间的 Pod 详情
+kubectl get pods -n rd-sales -o wide
+kubectl get pods -n rd-finance -o wide
+
+# 查看 Pod 事件
+kubectl describe pod [POD_NAME] -n [NAMESPACE]
+
+# 查看 Pod 日志
+kubectl logs [POD_NAME] -n [NAMESPACE] --tail=100
+
+# 查看资源使用情况
+kubectl top pods -n [NAMESPACE]
+kubectl top nodes
+```
+
+### Prometheus 指标查询 (Grafana Explore)
+```promql
+# 容器 CPU 使用率
+sum(rate(container_cpu_usage_seconds_total{namespace=~"rd-.*|baseservices-.*"}[5m])) by (namespace, pod)
+
+# 容器内存使用量
+sum(container_memory_working_set_bytes{namespace=~"rd-.*|baseservices-.*"}) by (namespace, pod)
+
+# 容器重启次数 (过去1小时)
+sum(increase(kube_pod_container_status_restarts_total[1h])) by (namespace, pod)
+
+# OOM 事件
+sum(increase(container_oom_events_total[1h])) by (namespace, pod)
+
+# Pod 状态
+kube_pod_status_phase
+
+# Deployment 可用副本
+kube_deployment_status_replicas_available
+```
+
+### 关键命名空间
+**业务服务:**
+- 销售: `rd-sales`
+- 财务: `rd-finance`
+- 供应链: `rd-supplychains`
+
+**基础服务:**
+- 风控: `baseservices-riskcontrol`
+- API网关: `api-gateway`
+- 监控: `monitor`
+
 
 ---
 
@@ -180,12 +276,12 @@ kubectl top nodes
 
 | 仪表板 | 用途 |
 |--------|------|
-| RDS MySQL Overview | 数据库性能监控 |
-| ElastiCache Redis | 缓存性能监控 |
-| Kubernetes Pods | 容器监控 |
-| Node Exporter | VM/主机监控 |
-| iZeus APM | 应用性能监控 |
-| DataLink Pipeline | ETL任务监控 |
-| Business Metrics | 业务指标监控 |
-| Risk Control | 风控监控 |
-| API Gateway | 网关监控 |
+| [Kubernetes Pods Dashboard](https://luckin-na-grafana.lkcoffee.com/d/kubernetes-pods) | Kubernetes 监控 |
+| [Node Exporter Full](https://luckin-na-grafana.lkcoffee.com/d/node-exporter-full) | Node Exporter 监控 |
+
+**Grafana 访问地址:** https://luckin-na-grafana.lkcoffee.com
+
+**Prometheus 数据源:**
+- MySQL 指标: `ff7hkeec6c9a8e`
+- Redis 指标: `ff6p0gjt24phce`
+- 默认指标: `df8o21agxtkw0d`
